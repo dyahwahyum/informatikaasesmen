@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Informatika</title>
+
+    <style>
+        /* ==================== */
+        /* CSS Styling */
+        /* ==================== */
+        :root {
+            --primary-blue: #007bff;
+            --secondary-blue: #e0f7ff;
+            --text-color: #333;
+            --bg-light: #f4f7f6;
+            --card-bg: #ffffff;
+            --shadow-light: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Ganti ke flex-start agar konten tetap di atas pada layar besar */
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            width: 100%;
+            max-width: 700px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px var(--shadow-light);
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+
+        /* Header dan Navigasi Soal */
+        header {
+            border-bottom: 2px solid var(--secondary-blue);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-blue);
+            margin-top: 0;
+            font-size: 1.8rem;
+        }
+
+        .question-indicator {
+            font-size: 1rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        /* Konten Soal (Card) */
+        .question-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px var(--shadow-light);
+            /* Transisi untuk pergantian soal */
+            opacity: 1;
+            transform: translateX(0);
+            transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+        }
+        
+        /* Animasi Transisi */
+        .fade-out {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        .fade-in {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .question-card h2 {
+            font-size: 1.35rem;
+            color: var(--text-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        /* Opsi Jawaban */
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .option-item {
+            background-color: var(--secondary-blue);
+            border: 1px solid var(--primary-blue);
+            color: var(--text-color);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-item:hover {
+            background-color: #cce5ff; /* Biru muda lebih gelap saat hover */
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px var(--shadow-light);
+        }
+
+        .option-item.selected {
+            background-color: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+
+        .option-item input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2); /* Memperbesar radio button */
+            accent-color: var(--primary-blue);
+        }
+        
+        .option-item.selected input[type="radio"] {
+            accent-color: white; /* Mengubah warna radio button saat terpilih */
+        }
+
+
+        /* Tombol Navigasi */
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background-color: #adb5bd;
+            cursor: not-allowed;
+        }
+
+        /* Bagian Hasil Akhir */
+        .results-container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .results-container h2 {
+            font-size: 2rem;
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+        }
+
+        .score {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 30px;
+        }
+
+        .score-text {
+            font-size: 1.2rem;
+            color: var(--text-color);
+        }
+        
+        /* Responsif */
+        @media (max-width: 600px) {
+            .quiz-container {
+                padding: 20px;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            
+            .navigation-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .option-item {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <header>
+            <h1>Kuis AI Interaktif</h1>
+            <div class="question-indicator" id="question-indicator">Soal 1 dari 10</div>
+        </header>
+
+        <div id="quiz-content">
+            </div>
+
+        <div class="navigation-buttons">
+            <button class="btn btn-secondary" id="prev-btn" disabled onclick="prevQuestion()">
+                &larr; Sebelumnya
+            </button>
+            <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()">
+                Selanjutnya &rarr;
+            </button>
+        </div>
+        
+        <div class="results-container" id="results-container" style="display: none;">
+            </div>
+    </div>
+
+    <script>
+        // ====================
+        // JavaScript Logic
+        // ====================
+
+        // 1. Data Soal
+        const questions = [
+            {
+                question: "Siapakah yang secara luas diakui sebagai 'Bapak AI'?",
+                options: ["Alan Turing", "John McCarthy", "Geoffrey Hinton", "Yann LeCun"],
+                answer: "John McCarthy"
+            },
+            {
+                question: "Apa singkatan dari istilah AI yang paling umum digunakan dalam konteks jaringan saraf tiruan?",
+                options: ["NLP", "ANN", "ML", "RL"],
+                answer: "ANN"
+            },
+            {
+                question: "Apa nama tes yang dirancang untuk menguji kemampuan mesin untuk menunjukkan perilaku cerdas yang setara atau tidak dapat dibedakan dari manusia?",
+                options: ["Turing Test", "Boston Test", "AlphaGo Test", "McCarthy Test"],
+                answer: "Turing Test"
+            },
+            {
+                question: "Bidang AI yang berfokus pada pelatihan komputer dari data disebut:",
+                options: ["Natural Language Processing (NLP)", "Robotics", "Machine Learning (ML)", "Computer Vision"],
+                answer: "Machine Learning (ML)"
+            },
+            {
+                question: "Metode pembelajaran dalam Machine Learning di mana model dilatih pada data yang sudah diberi label disebut:",
+                options: ["Unsupervised Learning", "Reinforcement Learning", "Supervised Learning", "Deep Learning"],
+                answer: "Supervised Learning"
+            },
+            {
+                question: "Arsitektur jaringan saraf tiruan apa yang sering digunakan untuk memproses data sekuensial seperti teks atau ucapan?",
+                options: ["Convolutional Neural Network (CNN)", "Recurrent Neural Network (RNN)", "Perceptron", "Generative Adversarial Network (GAN)"],
+                answer: "Recurrent Neural Network (RNN)"
+            },
+            {
+                question: "Apa istilah untuk AI yang hanya dapat melakukan tugas tertentu (narrowly defined) dan tidak memiliki kesadaran atau kemampuan berpikir luas seperti manusia?",
+                options: ["Artificial General Intelligence (AGI)", "Artificial Super Intelligence (ASI)", "Narrow AI (Weak AI)", "Strong AI"],
+                answer: "Narrow AI (Weak AI)"
+            },
+            {
+                question: "Model bahasa besar (LLM) seperti GPT-4 merupakan contoh aplikasi dari:",
+                options: ["Reinforcement Learning", "Computer Vision", "Natural Language Processing (NLP)", "Expert Systems"],
+                answer: "Natural Language Processing (NLP)"
+            },
+            {
+                question: "Dalam konteks Machine Learning, apa yang dimaksud dengan 'Overfitting'?",
+                options: ["Model terlalu sederhana untuk data.", "Model bekerja sangat baik pada data pelatihan tetapi buruk pada data baru.", "Model gagal untuk mempelajari pola apa pun dari data.", "Model hanya dapat memproses data teks."],
+                answer: "Model bekerja sangat baik pada data pelatihan tetapi buruk pada data baru."
+            },
+            {
+                question: "Apa algoritma AI yang paling sering digunakan untuk pengenalan gambar dan video?",
+                options: ["Recurrent Neural Network (RNN)", "Linear Regression", "Convolutional Neural Network (CNN)", "K-Means Clustering"],
+                answer: "Convolutional Neural Network (CNN)"
+            }
+        ];
+
+        // Variabel Status Kuis
+        let currentQuestionIndex = 0; // Index soal yang sedang aktif
+        // Array untuk menyimpan jawaban pengguna (disimpan sebagai teks opsi jawaban)
+        let userAnswers = new Array(questions.length).fill(null); 
+        
+        // Element DOM
+        const quizContent = document.getElementById('quiz-content');
+        const questionIndicator = document.getElementById('question-indicator');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const quizContainer = document.querySelector('.quiz-container');
+
+        /**
+         * 2. Fungsi untuk Render Soal
+         */
+        function renderQuestion() {
+            // Hapus konten yang ada untuk transisi
+            const oldCard = document.querySelector('.question-card');
+            if (oldCard) {
+                oldCard.classList.add('fade-out');
+                setTimeout(() => {
+                    oldCard.remove();
+                    displayCurrentQuestion();
+                }, 400); // Tunggu hingga animasi fade-out selesai (400ms = 0.4s)
+            } else {
+                displayCurrentQuestion();
+            }
+
+            // Perbarui indikator soal
+            questionIndicator.textContent = `Soal ${currentQuestionIndex + 1} dari ${questions.length}`;
+            
+            // Perbarui status tombol
+            prevBtn.disabled = currentQuestionIndex === 0;
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.textContent = 'Selesaikan Kuis';
+            } else {
+                nextBtn.textContent = 'Selanjutnya \u2192';
+            }
+        }
+
+        /**
+         * 3. Fungsi Inti untuk Menampilkan Soal
+         */
+        function displayCurrentQuestion() {
+            if (currentQuestionIndex >= questions.length) return; // Mencegah error jika index di luar batas
+
+            const currentQ = questions[currentQuestionIndex];
+            
+            // Buat HTML untuk card soal
+            const questionHTML = `
+                <div class="question-card fade-in">
+                    <h2>${currentQ.question}</h2>
+                    <ul class="options-list">
+                        ${currentQ.options.map((option, index) => {
+                            // Cek apakah opsi ini adalah jawaban yang telah dipilih pengguna
+                            const isSelected = userAnswers[currentQuestionIndex] === option;
+                            const optionId = `q${currentQuestionIndex}-opt${index}`;
+                            
+                            return `
+                                <li class="option-item ${isSelected ? 'selected' : ''}" 
+                                    onclick="selectAnswer(event, '${option}')">
+                                    <input type="radio" 
+                                           name="question-${currentQuestionIndex}" 
+                                           id="${optionId}" 
+                                           value="${option}" 
+                                           ${isSelected ? 'checked' : ''}
+                                           style="pointer-events: none;"> <label for="${optionId}">${String.fromCharCode(65 + index)}. ${option}</label>
+                                </li>
+                            `;
+                        }).join('')}
+                    </ul>
+                </div>
+            `;
+            
+            // Masukkan ke DOM
+            quizContent.innerHTML = questionHTML;
+        }
+
+        /**
+         * 4. Fungsi Menangani Pilihan Jawaban
+         */
+        function selectAnswer(event, selectedOption) {
+            // Dapatkan semua elemen opsi untuk soal ini
+            const options = event.currentTarget.closest('.options-list').querySelectorAll('.option-item');
+            
+            // Hapus kelas 'selected' dari semua opsi dan update radio button
+            options.forEach(item => {
+                item.classList.remove('selected');
+                const radio = item.querySelector('input[type="radio"]');
+                if (radio) radio.checked = false;
+            });
+            
+            // Tambahkan kelas 'selected' ke opsi yang baru dipilih
+            event.currentTarget.classList.add('selected');
+            const selectedRadio = event.currentTarget.querySelector('input[type="radio"]');
+            if (selectedRadio) selectedRadio.checked = true;
+
+            // Simpan jawaban pengguna
+            userAnswers[currentQuestionIndex] = selectedOption;
+        }
+
+        /**
+         * 5. Fungsi Navigasi Maju
+         */
+        function nextQuestion() {
+            // Cek apakah soal sudah terjawab sebelum pindah ke soal baru (opsional, untuk memastikan semua terjawab)
+            // if (!userAnswers[currentQuestionIndex]) {
+            //     alert("Anda harus memilih jawaban sebelum melanjutkan.");
+            //     return;
+            // }
+
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                // Selesaikan Kuis
+                showResults();
+            }
+        }
+
+        /**
+         * 6. Fungsi Navigasi Mundur
+         */
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        /**
+         * 7. Fungsi Menampilkan Hasil
+         */
+        function showResults() {
+            let score = 0;
+            
+            // Hitung skor
+            questions.forEach((q, index) => {
+                if (userAnswers[index] === q.answer) {
+                    score++;
+                }
+            });
+
+            // Sembunyikan konten kuis dan tampilkan hasil
+            quizContent.style.display = 'none';
+            document.querySelector('.navigation-buttons').style.display = 'none';
+            resultsContainer.style.display = 'block';
+
+            // Animasi card container saat menampilkan hasil (opsional)
+            quizContainer.style.maxWidth = '500px'; 
+            
+            const resultsHTML = `
+                <h2>🎉 Kuis Selesai! 🎉</h2>
+                <p class="score-text">Skor akhir Anda adalah:</p>
+                <div class="score">${score} dari ${questions.length}</div>
+                <p class="score-text">Terima kasih telah berpartisipasi!</p>
+                <button class="btn btn-primary" onclick="window.location.reload()">Mulai Ulang Kuis</button>
+            `;
+            
+            resultsContainer.innerHTML = resultsHTML;
+        }
+
+        // Inisialisasi Kuis saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', renderQuestion);
+
+    </script>
+</body>
+</html>
